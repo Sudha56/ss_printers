@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SS Printers — Order Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">SS Printers</div>
+      <nav class="nav"><a href="#order">Place Order</a><a href="#contact">Contact</a></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="order" class="card">
+      <h2>Place an Order</h2>
+      <form id="orderForm">
+        <label>Client / Company</label><input id="clientName" required>
+
+        <label>Product Type</label>
+        <select id="productType">
+          <option>Brochure</option><option>Flyer</option><option>Box / Packaging</option><option>Poster</option>
+        </select>
+
+        <div class="row two">
+          <div>
+            <label>Quantity</label><input id="quantity" type="number" min="1" value="100" required>
+          </div>
+          <div>
+            <label>Material Type</label><input id="materialType" placeholder="e.g. 300gsm coated" >
+          </div>
+        </div>
+
+        <div class="row two">
+          <div><label>Material Cost (per unit)</label><input id="materialCost" type="number" min="0" value="0"></div>
+          <div><label>Production Cost (per unit)</label><input id="productionCost" type="number" min="0" value="0"></div>
+        </div>
+
+        <label>GST %</label><input id="gstPercent" type="number" min="0" value="18">
+
+        <label>Delivery Date</label><input id="deliveryDate" type="date">
+
+        <label>Mobile Number</label><input id="mobile" type="tel" placeholder="+91xxxxxxxxxx" required>
+
+        <label>Email Address</label><input id="email" type="email" placeholder="name@example.com">
+
+        <label>Design File (optional)</label><input id="designFile" type="file" accept=".pdf,.jpg,.png,.zip,.ai,.psd">
+
+        <label>Notes</label><textarea id="notes" rows="3"></textarea>
+
+        <div class="actions">
+          <button type="submit" class="btn">Submit Order</button>
+          <div id="orderResult" class="muted"></div>
+        </div>
+      </form>
+    </section>
+
+    <section id="contact" class="card" style="margin-top:18px">
+      <h3>Contact</h3>
+      <p class="muted">Email: sudha13004@gmail.com • Phone: +91 8056569894</p>
+    </section>
+  </main>
+
+  <!-- Admin panel (hidden unless ?admin=YOUR_SECRET added to URL) -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <div class="container">
+      <h2>Admin Dashboard</h2>
+      <div class="admin-controls">
+        <input id="searchAdmin" placeholder="Search order id or client">
+        <button id="refreshBtn" class="btn-ghost">Refresh</button>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+  </div>
+
+  <footer class="footer"><div class="container">© <span id="year"></span> SS Printers</div></footer>
+
+  <!-- App script (module) -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
