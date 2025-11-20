@@ -1,84 +1,139 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SS Printers — Order Portal</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SS Printers - Place Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 700px;
+        margin: 50px auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #1a202c;
+        margin-bottom: 30px;
+    }
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: 500;
+        color: #333;
+    }
+    input, select, textarea, button {
+        width: 100%;
+        padding: 12px 15px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+        margin-top: 25px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    #message {
+        margin-top: 20px;
+        font-weight: 600;
+        text-align: center;
+        color: green;
+    }
+    @media (max-width: 768px) {
+        .container {
+            padding: 25px;
+            margin: 30px 15px;
+        }
+    }
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="container">
-      <div class="brand">SS Printers</div>
-      <nav class="nav"><a href="#order">Place Order</a><a href="#contact">Contact</a></nav>
-    </div>
-  </header>
-
-  <main class="container">
-    <section id="order" class="card">
-      <h2>Place an Order</h2>
-      <form id="orderForm">
-        <label>Client / Company</label><input id="clientName" required>
+<div class="container">
+    <h1>SS Printers - Place Your Order</h1>
+    <form id="orderForm">
+        <label>Client / Company</label>
+        <input type="text" name="client" placeholder="Enter your company name" required>
 
         <label>Product Type</label>
-        <select id="productType">
-          <option>Brochure</option><option>Flyer</option><option>Box / Packaging</option><option>Poster</option>
+        <select name="product" required>
+            <option value="">Select Product Type</option>
+            <option value="Brochure">Brochure</option>
+            <option value="Flyer">Flyer</option>
+            <option value="Business Card">Business Card</option>
+            <option value="Poster">Poster</option>
+            <option value="Banner">Banner</option>
+            <option value="Letterhead">Letterhead</option>
+            <option value="Invitation Card">Invitation Card</option>
+            <option value="Sticker">Sticker</option>
+            <option value="Booklet / Catalog">Booklet / Catalog</option>
+            <option value="Envelope">Envelope</option>
+            <option value="Menu Card">Menu Card</option>
+            <option value="Calendar">Calendar</option>
         </select>
 
-        <div class="row two">
-          <div>
-            <label>Quantity</label><input id="quantity" type="number" min="1" value="100" required>
-          </div>
-          <div>
-            <label>Material Type</label><input id="materialType" placeholder="e.g. 300gsm coated" >
-          </div>
-        </div>
+        <label>Quantity</label>
+        <input type="number" name="quantity" placeholder="Enter quantity" required>
 
-        <div class="row two">
-          <div><label>Material Cost (per unit)</label><input id="materialCost" type="number" min="0" value="0"></div>
-          <div><label>Production Cost (per unit)</label><input id="productionCost" type="number" min="0" value="0"></div>
-        </div>
+        <label>Delivery Date</label>
+        <input type="date" name="delivery_date" required>
 
-        <label>GST %</label><input id="gstPercent" type="number" min="0" value="18">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
 
-        <label>Delivery Date</label><input id="deliveryDate" type="date">
+        <label>Notes</label>
+        <textarea name="notes" placeholder="Additional notes (optional)"></textarea>
 
-        <label>Mobile Number</label><input id="mobile" type="tel" placeholder="+91xxxxxxxxxx" required>
+        <label>Design File (optional)</label>
+        <input type="file" name="design_file">
 
-        <label>Email Address</label><input id="email" type="email" placeholder="name@example.com">
+        <button type="submit">Submit Order</button>
+    </form>
+    <div id="message"></div>
+</div>
 
-        <label>Design File (optional)</label><input id="designFile" type="file" accept=".pdf,.jpg,.png,.zip,.ai,.psd">
-
-        <label>Notes</label><textarea id="notes" rows="3"></textarea>
-
-        <div class="actions">
-          <button type="submit" class="btn">Submit Order</button>
-          <div id="orderResult" class="muted"></div>
-        </div>
-      </form>
-    </section>
-
-    <section id="contact" class="card" style="margin-top:18px">
-      <h3>Contact</h3>
-      <p class="muted">Email: sudha13004@gmail.com • Phone: +91 8056569894</p>
-    </section>
-  </main>
-
-  <!-- Admin panel (hidden unless ?admin=YOUR_SECRET added to URL) -->
-  <div id="adminPanel" class="admin-panel hidden">
-    <div class="container">
-      <h2>Admin Dashboard</h2>
-      <div class="admin-controls">
-        <input id="searchAdmin" placeholder="Search order id or client">
-        <button id="refreshBtn" class="btn-ghost">Refresh</button>
-      </div>
-      <div id="ordersList"></div>
-    </div>
-  </div>
-
-  <footer class="footer"><div class="container">© <span id="year"></span> SS Printers</div></footer>
-
-  <!-- App script (module) -->
-  <script type="module" src="script.js"></script>
+<script>
+const form = document.getElementById('orderForm');
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new FormData(form);
+    
+    fetch('http://127.0.0.1:5000/orders', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('message').innerText = data.message;
+        form.reset();
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById('message').innerText = 'Order submission failed!';
+    });
+});
+</script>
 </body>
 </html>
