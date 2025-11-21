@@ -1,8 +1,8 @@
+// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Firebase configuration
+// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyDPhLu10o_ce_1PW-_sP0MZGN8o_bMfZtk",
     authDomain: "ss-printers.firebaseapp.com",
@@ -12,86 +12,57 @@ const firebaseConfig = {
     appId: "1:625571268370:web:221090a300511c1ff4d5cb"
 };
 
+// Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-const orderForm = document.getElementById("orderForm");
-const resultDiv = document.getElementById("orderResult");
-
-orderForm.addEventListener("submit", async function(e) {
+// Handle form submit
+document.getElementById("orderForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    // Clear previous messages
-    resultDiv.innerText = "";
-
-    // Collect form values
-    const clientName = document.getElementById("clientName").value.trim();
-    const productType = document.getElementById("productType").value.trim();
-    const quantity = parseInt(document.getElementById("quantity").value) || 0;
-    const deliveryDate = document.getElementById("deliveryDate").value;
-    const mobile = document.getElementById("mobile").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const notes = document.getElementById("notes").value.trim();
-    const fileInput = document.getElementById("designFile");
-
-    // Validation
-    if (!clientName || !productType || quantity <= 0 || !deliveryDate || !email) {
-        resultDiv.innerText = "❌ Please fill all required fields correctly.";
-        return;
-    }
-
-    // Upload file if exists
-    let fileURL = "";
-    if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const storageRef = ref(storage, `orders/${Date.now()}_${file.name}`);
-        try {
-            const snapshot = await uploadBytes(storageRef, file);
-            fileURL = await getDownloadURL(snapshot.ref);
-        } catch (err) {
-            console.error("File upload error:", err);
-            resultDiv.innerText = "❌ Error uploading file: " + err.message;
-            return;
-        }
-    }
-
-    // Prepare order object
     const orderData = {
-        clientName,
-        productType,
-        quantity,
-        deliveryDate,
-        mobile,
-        email,
-        notes,
-        fileURL,
-        timestamp: serverTimestamp()
+        clientName: document.getElementById("clientName").value,
+        productType: document.getElementById("productType").value,
+        quantity: document.getElementById("quantity").value,
+        materialType: document.getElementById("materialType").value,
+        materialCost: document.getElementById("materialCost").value,
+        productionCost: document.getElementById("productionCost").value,
+        gstPercent: document.getElementById("gstPercent").value,
+        deliveryDate: document.getElementById("deliveryDate").value,
+        mobile: document.getElementById("mobile").value,
+        email: document.getElementById("email").value,
+        notes: document.getElementById("notes").value,
+        timestamp: Date.now()
     };
 
-    // Submit order to Firestore
     try {
         await addDoc(collection(db, "orders"), orderData);
-        resultDiv.innerText = "✅ Order submitted successfully!";
-
-        // Open default email client with pre-filled order details
-        const subject = encodeURIComponent(`New Order from ${clientName}`);
-        const body = encodeURIComponent(`
-Client: ${clientName}
-Product: ${productType}
-Quantity: ${quantity}
-Delivery Date: ${deliveryDate}
-Email: ${email}
-Mobile: ${mobile}
-Notes: ${notes}
-File URL: ${fileURL || "No file"}
-        `);
-
-        window.location.href = `mailto:sudha13004@gmail.com?subject=${subject}&body=${body}`;
-
-        orderForm.reset();
+        document.getElementById("orderResult").innerText = "Order submitted successfully!";
+        document.getElementById("orderForm").reset();
     } catch (error) {
-        console.error("Firestore submission error:", error);
-        resultDiv.innerText = "❌ Error submitting order: " + error.message;
+        console.error(error);
+        document.getElementById("orderResult").innerText = "Error submitting order!";
     }
 });
+
+Style.css
+:root{--accent:#1e6fd8;--bg:#f6f8fb;--muted:#6b7280}
+*{box-sizing:border-box}body{font-family:Inter,system-ui,Arial,sans-serif;margin:0;background:var(--bg);color:#0f172a}
+.container{max-width:900px;margin:0 auto;padding:18px}
+.topbar{background:linear-gradient(90deg,var(--accent),#79b8ff);color:#fff;padding:14px}
+.brand{font-weight:700}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(12,20,40,0.06)}
+.row.two{display:flex;gap:12px}
+.row.two > div{flex:1}
+label{display:block;font-weight:600;margin-top:10px}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eefc;margin-top:6px}
+.actions{display:flex;align-items:center;gap:12px;margin-top:12px}
+.btn{background:var(--accent);color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(15,23,42,0.06);padding:8px 12px;border-radius:8px}
+.muted{color:var(--muted);font-size:0.95rem}
+.admin-panel{position:fixed;left:0;top:70px;right:0;bottom:0;background:rgba(255,255,255,0.98);overflow:auto;padding:18px}
+.hidden{display:none}
+.orders-list .card{margin-bottom:12px}
+.status-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0f6ff;color:var(--accent);font-weight:700}
+.footer{margin-top:18px;padding:12px;text-align:center;color:var(--muted)}
+@media(max-width:820px){.row.two{flex-direction:column}}
