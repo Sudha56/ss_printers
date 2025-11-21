@@ -1,9 +1,8 @@
-// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
-// Firebase configuration
+// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyDPhLu10o_ce_1PW-_sP0MZGN8o_bMfZtk",
     authDomain: "ss-printers.firebaseapp.com",
@@ -13,36 +12,34 @@ const firebaseConfig = {
     appId: "1:625571268370:web:221090a300511c1ff4d5cb"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-const form = document.getElementById("orderForm");
-const messageDiv = document.getElementById("message");
+const orderForm = document.getElementById("orderForm");
+const orderResult = document.getElementById("orderResult");
 
-form.addEventListener("submit", async (e) => {
+orderForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    messageDiv.innerText = "";
+    orderResult.innerText = "";
 
-    // Collect form values
-    const clientName = form.client.value.trim();
-    const productType = form.product.value.trim();
-    const quantity = parseInt(form.quantity.value) || 0;
-    const deliveryDate = form.delivery_date.value;
-    const email = form.email.value.trim();
-    const notes = form.notes.value.trim();
-    const fileInput = form.design_file;
+    const clientName = document.getElementById("clientName").value.trim();
+    const productType = document.getElementById("productType").value.trim();
+    const quantity = parseInt(document.getElementById("quantity").value) || 0;
+    const deliveryDate = document.getElementById("deliveryDate").value;
+    const mobile = document.getElementById("mobile").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const notes = document.getElementById("notes").value.trim();
+    const fileInput = document.getElementById("designFile");
 
-    // Validation
     if (!clientName || !productType || quantity <= 0 || !deliveryDate || !email) {
-        messageDiv.innerText = "❌ Please fill all required fields correctly.";
+        orderResult.innerText = "❌ Please fill all required fields.";
         return;
     }
 
-    // Upload file to Firebase Storage (optional)
+    // Upload file if exists
     let fileURL = "";
-    if (fileInput && fileInput.files.length > 0) {
+    if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const storageRef = ref(storage, `orders/${Date.now()}_${file.name}`);
         try {
@@ -50,44 +47,29 @@ form.addEventListener("submit", async (e) => {
             fileURL = await getDownloadURL(snapshot.ref);
         } catch (err) {
             console.error("File upload error:", err);
-            messageDiv.innerText = "❌ Error uploading file: " + err.message;
+            orderResult.innerText = "❌ File upload failed.";
             return;
         }
     }
 
-    // Prepare order object
     const orderData = {
         clientName,
         productType,
         quantity,
         deliveryDate,
+        mobile,
         email,
         notes,
         fileURL,
         timestamp: serverTimestamp()
     };
 
-    // Save order in Firestore
     try {
         await addDoc(collection(db, "orders"), orderData);
-        messageDiv.innerText = "✅ Order submitted successfully!";
-
-        // Open email client with pre-filled order details
-        const subject = encodeURIComponent(`New Order from ${clientName}`);
-        const body = encodeURIComponent(`
-Client: ${clientName}
-Product: ${productType}
-Quantity: ${quantity}
-Delivery Date: ${deliveryDate}
-Email: ${email}
-Notes: ${notes}
-File URL: ${fileURL || "No file"}
-        `);
-        window.location.href = `mailto:sudha13004@gmail.com?subject=${subject}&body=${body}`;
-
-        form.reset();
-    } catch (error) {
-        console.error("Firestore submission error:", error);
-        messageDiv.innerText = "❌ Error submitting order: " + error.message;
+        orderResult.innerText = "✅ Order submitted successfully!";
+        orderForm.reset();
+    } catch (err) {
+        console.error(err);
+        orderResult.innerText = "❌ Failed to submit order.";
     }
 });
