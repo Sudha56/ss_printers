@@ -21,27 +21,25 @@
   </label>
 
   <label>Product Type:
-    <input type="text" id="productType" required>
+    <select id="productType" required>
+      <option value="">Select Product Type</option>
+      <option value="Brochure">Brochure</option>
+      <option value="Flyer">Flyer</option>
+      <option value="Business Card">Business Card</option>
+      <option value="Poster">Poster</option>
+      <option value="Banner">Banner</option>
+      <option value="Letterhead">Letterhead</option>
+      <option value="Invitation Card">Invitation Card</option>
+      <option value="Sticker">Sticker</option>
+      <option value="Booklet / Catalog">Booklet / Catalog</option>
+      <option value="Envelope">Envelope</option>
+      <option value="Menu Card">Menu Card</option>
+      <option value="Calendar">Calendar</option>
+    </select>
   </label>
 
   <label>Quantity:
     <input type="number" id="quantity" required>
-  </label>
-
-  <label>Material Type:
-    <input type="text" id="materialType">
-  </label>
-
-  <label>Material Cost:
-    <input type="number" step="0.01" id="materialCost">
-  </label>
-
-  <label>Production Cost:
-    <input type="number" step="0.01" id="productionCost">
-  </label>
-
-  <label>GST %:
-    <input type="number" step="0.01" id="gstPercent">
   </label>
 
   <label>Delivery Date:
@@ -87,7 +85,18 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const storage = getStorage(app);
+</script>
 
+<!-- EmailJS -->
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script type="text/javascript">
+  (function(){
+    emailjs.init("YOUR_EMAILJS_USER_ID"); // Replace with your EmailJS user ID
+  })();
+</script>
+
+<!-- Custom JS -->
+<script type="module">
   const orderForm = document.getElementById("orderForm");
   const resultDiv = document.getElementById("orderResult");
 
@@ -98,17 +107,12 @@
     const clientName = document.getElementById("clientName").value.trim();
     const productType = document.getElementById("productType").value.trim();
     const quantity = parseInt(document.getElementById("quantity").value) || 0;
-    const materialType = document.getElementById("materialType").value.trim();
-    const materialCost = parseFloat(document.getElementById("materialCost").value) || 0;
-    const productionCost = parseFloat(document.getElementById("productionCost").value) || 0;
-    const gstPercent = parseFloat(document.getElementById("gstPercent").value) || 0;
     const deliveryDate = document.getElementById("deliveryDate").value;
     const mobile = document.getElementById("mobile").value.trim();
     const email = document.getElementById("email").value.trim();
     const notes = document.getElementById("notes").value.trim();
     const fileInput = document.getElementById("designFile");
 
-    // Validation
     if (!clientName || !productType || quantity <= 0 || !deliveryDate || !email) {
       resultDiv.innerText = "❌ Please fill all required fields correctly.";
       return;
@@ -133,10 +137,6 @@
       clientName,
       productType,
       quantity,
-      materialType,
-      materialCost,
-      productionCost,
-      gstPercent,
       deliveryDate,
       mobile,
       email,
@@ -146,8 +146,29 @@
     };
 
     try {
+      // Save to Firestore
       await addDoc(collection(db, "orders"), orderData);
       resultDiv.innerText = "✅ Order submitted successfully!";
+
+      // Send Email via EmailJS
+      emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+        client_name: clientName,
+        product_type: productType,
+        quantity: quantity,
+        delivery_date: deliveryDate,
+        email: email,
+        mobile: mobile,
+        notes: notes,
+        file_url: fileURL
+      }).then(
+        function(response) {
+          console.log("Email sent successfully!", response.status, response.text);
+        },
+        function(error) {
+          console.error("Failed to send email:", error);
+        }
+      );
+
       orderForm.reset();
     } catch (error) {
       console.error("Firestore submission error:", error);
