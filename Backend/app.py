@@ -10,14 +10,15 @@ CORS(app)
 UPLOAD_FOLDER = 'uploads'
 ORDER_FILE = 'orders.csv'
 
+# Ensure folders and CSV exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 if not os.path.exists(ORDER_FILE):
     with open(ORDER_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['Name','Email','Product','Quantity','Delivery Date','Notes','Design File'])
 
+# Environment variables
 SMTP_EMAIL = os.getenv('SMTP_EMAIL')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 SMTP_SERVER = os.getenv('SMTP_SERVER','smtp.gmail.com')
@@ -25,6 +26,7 @@ SMTP_PORT = int(os.getenv('SMTP_PORT',587))
 
 @app.route('/place-order', methods=['POST'])
 def place_order():
+    # Get form data
     name = request.form.get('name')
     email = request.form.get('email')
     product = request.form.get('product')
@@ -32,18 +34,19 @@ def place_order():
     delivery_date = request.form.get('deliveryDate')
     notes = request.form.get('notes')
 
+    # Optional design file
+    filename = ''
     if 'designFile' in request.files:
         file = request.files['designFile']
-        filename = ''
         if file.filename != '':
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-    else:
-        filename = ''
 
+    # Validate required fields
     if not all([name,email,product,quantity]):
         return jsonify({'status':'error','message':'Please fill all required fields'}),400
 
+    # Save to CSV
     try:
         with open(ORDER_FILE,'a',newline='') as f:
             writer = csv.writer(f)
@@ -53,6 +56,9 @@ def place_order():
 
     # Send email
     try:
+        if not SMTP_EMAIL or not SMTP_PASSWORD:
+            return jsonify({'status':'error','message':'SMTP credentials not set'}),500
+
         msg = MIMEText(f"Hi {name},\n\nYour order for {quantity} x {product} has been received.\n\nThank you for ordering from SS Printers!")
         msg['Subject'] = 'Order Confirmation - SS Printers'
         msg['From'] = SMTP_EMAIL
