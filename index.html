@@ -54,6 +54,9 @@
         <label>Notes</label>
         <textarea id="notes" name="notes" placeholder="Additional notes (optional)"></textarea>
 
+        <label>Design File (optional)</label>
+        <input type="file" id="designFile" name="designFile" accept=".png,.jpg,.jpeg,.pdf,.zip">
+
         <button type="submit">Submit Order</button>
     </form>
 
@@ -63,30 +66,35 @@
 <script>
 const form = document.getElementById('orderForm');
 
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', function(e){
     e.preventDefault();
 
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const product = document.getElementById('product').value;
-    const quantity = document.getElementById('quantity').value;
-    const deliveryDate = document.getElementById('deliveryDate').value;
-    const notes = document.getElementById('notes').value;
+    const formData = new FormData();
+    formData.append("name", document.getElementById('name').value);
+    formData.append("email", document.getElementById('email').value);
+    formData.append("product", document.getElementById('product').value);
+    formData.append("quantity", document.getElementById('quantity').value);
+    formData.append("deliveryDate", document.getElementById('deliveryDate').value);
+    formData.append("notes", document.getElementById('notes').value);
 
-    try {
-        const res = await fetch('https://ss-printers-backend.onrender.com/place-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, product, quantity, deliveryDate, notes })
-        });
+    const fileInput = document.getElementById('designFile');
+    if(fileInput.files[0]) {
+        formData.append("designFile", fileInput.files[0]);
+    }
 
-        const result = await res.json();
+    fetch('https://ss-printers-backend.onrender.com/place-order', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(result => {
         document.getElementById('message').innerText = result.message;
         if(result.status === 'success') form.reset();
-    } catch(err) {
+    })
+    .catch(err => {
         console.error(err);
         document.getElementById('message').innerText = "❌ Submission failed!";
-    }
+    });
 });
 </script>
 
