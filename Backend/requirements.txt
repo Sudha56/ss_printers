@@ -3,3 +3,4 @@ gunicorn
 Werkzeug
 python-dotenv
 Flask-Mail
+flask-cors

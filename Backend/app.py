@@ -8,7 +8,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Allow frontend requests
 
-# Environment variables (set in Render or locally)
+# Environment variables (set in Render)
 SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
 SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
 SMTP_EMAIL = os.getenv('SMTP_EMAIL')
@@ -19,7 +19,7 @@ ORDER_FILE = 'orders.csv'
 if not os.path.exists(ORDER_FILE):
     with open(ORDER_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Name', 'Email', 'Product', 'Quantity'])
+        writer.writerow(['Name', 'Email', 'Product', 'Quantity', 'Delivery Date', 'Notes'])
 
 @app.route('/place-order', methods=['POST'])
 def place_order():
@@ -29,15 +29,17 @@ def place_order():
     email = data.get('email')
     product = data.get('product')
     quantity = data.get('quantity')
+    delivery_date = data.get('deliveryDate')
+    notes = data.get('notes')
 
-    if not all([name, email, product, quantity]):
-        return jsonify({'status': 'error', 'message': 'Please fill all fields'}), 400
+    if not all([name, email, product, quantity, delivery_date]):
+        return jsonify({'status': 'error', 'message': 'Please fill all required fields'}), 400
 
     # Save order to CSV
     try:
         with open(ORDER_FILE, 'a', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([name, email, product, quantity])
+            writer.writerow([name, email, product, quantity, delivery_date, notes])
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save order: {e}'}), 500
 
@@ -47,7 +49,7 @@ def place_order():
 
     # Send confirmation email
     try:
-        msg = MIMEText(f"Hi {name},\n\nYour order for {quantity} x {product} has been received. Thank you for ordering from SS Printers!")
+        msg = MIMEText(f"Hi {name},\n\nYour order for {quantity} x {product} has been received.\nDelivery Date: {delivery_date}\nNotes: {notes}\n\nThank you for ordering from SS Printers!")
         msg['Subject'] = 'Order Confirmation - SS Printers'
         msg['From'] = SMTP_EMAIL
         msg['To'] = email
@@ -60,9 +62,8 @@ def place_order():
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Order saved but email failed: {e}'}), 500
 
-    return jsonify({'status': 'success', 'message': 'Order placed and email sent!'}), 200
+    return jsonify({'status': 'success', 'message': '✅ Order placed and email sent!'}), 200
 
 if __name__ == '__main__':
-    # Use port from environment (Render provides PORT)
     port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
